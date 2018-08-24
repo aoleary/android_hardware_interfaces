@@ -31,11 +31,18 @@
 #include <cutils/properties.h>
 #include <hidl/HidlTransportSupport.h>
 #include <hidl/LegacySupport.h>
+#ifdef ENABLE_SPLIT_A2DP
+#include <com/qualcomm/qti/bluetooth_audio/1.0/IBluetoothAudio.h>
+#endif /* ENABLE_SPLIT_A2DP */
 #include <hwbinder/ProcessState.h>
 
 using namespace android::hardware;
-using android::OK;
 
+#ifdef ENABLE_SPLIT_A2DP
+using com::qualcomm::qti::bluetooth_audio::V1_0::IBluetoothAudio;
+#endif /* ENABLE_SPLIT_A2DP */
+
+using android::OK;
 
 #ifdef ARCH_ARM_32
 //default h/w binder memsize is 1 MB
@@ -90,6 +97,11 @@ int main(int /* argc */, char* /* argv */ []) {
         registerPassthroughServiceImplementation<bluetooth::a2dp::V1_0::IBluetoothAudioOffload>() !=
         OK;
     ALOGW_IF(fail, "Could not register Bluetooth audio offload 1.0");
+
+#ifdef ENABLE_SPLIT_A2DP
+    fail = registerPassthroughServiceImplementation<IBluetoothAudio>()!= OK;
+    ALOGW_IF(fail, "Could not register bluetooth_audio service");
+#endif /* ENABLE_SPLIT_A2DP */
 
     joinRpcThreadpool();
 }
